@@ -1,0 +1,160 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R 6 0 R 7 0 R 8 0 R 9 0 R 10 0 R 11 0 R] /Count 7 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 960 540] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 12 0 R >>
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 960 540] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 13 0 R >>
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 960 540] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 14 0 R >>
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 960 540] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 15 0 R >>
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 960 540] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 16 0 R >>
+endobj
+10 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 960 540] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 17 0 R >>
+endobj
+11 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 960 540] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 18 0 R >>
+endobj
+12 0 obj
+<< /Length 645 >>
+stream
+BT /F2 30 Tf 56 454 Td (ProofGate) Tj ET
+BT /F2 18 Tf 56 404 Td (AI-compiled lending policies, enforced by Attestcoin proofs.) Tj ET
+BT /F1 12 Tf 56 370 Td (A lender writes rules in plain English. An AI compiles them into a policy) Tj ET
+BT /F1 12 Tf 56 353 Td (committed on-chain BEFORE anyone applies. Credit moves only when the policy) Tj ET
+BT /F1 12 Tf 56 336 Td (allows it AND the Attestcoin Protocol has cryptographically proven the) Tj ET
+BT /F1 12 Tf 56 319 Td (repayment history.) Tj ET
+BT /F2 15 Tf 56 280 Td (The AI interprets the policy. The contract enforces it.) Tj ET
+BT /F1 12 Tf 56 246 Td (BUIDL CTC 2026 Fall - AI track) Tj ET
+endstream
+endobj
+13 0 obj
+<< /Length 755 >>
+stream
+BT /F2 30 Tf 56 454 Td (The problem: AI agents with money can't be trusted) Tj ET
+BT /F1 12 Tf 56 413 Td (LLMs can FABRICATE repayment histories, INFLATE amounts, and 'reinterpret') Tj ET
+BT /F1 12 Tf 56 396 Td (rules into what the lender never agreed to.) Tj ET
+BT /F1 12 Tf 56 362 Td (Contracts can't judge free-text rules - that judgment is the one job only) Tj ET
+BT /F1 12 Tf 56 345 Td (the AI can do. So keep the AI, but bind it:) Tj ET
+BT /F1 12 Tf 56 328 Td (  1. to its OWN COMMITTED POLICY \(immutable, on-chain, pre-application\),) Tj ET
+BT /F1 12 Tf 56 311 Td (  2. to CRYPTOGRAPHICALLY PROVEN cross-chain facts \(Attestcoin Protocol\).) Tj ET
+BT /F2 15 Tf 56 272 Td (Every release pays the decoded, proven total - never the AI's claim.) Tj ET
+endstream
+endobj
+14 0 obj
+<< /Length 893 >>
+stream
+BT /F2 30 Tf 56 454 Td (Architecture) Tj ET
+BT /F1 12 Tf 56 413 Td (PolicyRegistry - English policy -> LLM-compiled struct + policyTextHash,) Tj ET
+BT /F1 12 Tf 56 396 Td (  committed immutable. Versioning = new policyId.) Tj ET
+BT /F1 12 Tf 56 379 Td (ProofGate - submitRepaymentProof \(verify via precompile -> replay guard ->) Tj ET
+BT /F1 12 Tf 56 362 Td (  decode Transfer from the proven receipt -> policy checks\), then) Tj ET
+BT /F1 12 Tf 56 345 Td (  requestCredit \(count >= min, claim <= cap, mint min\(decoded, cap\)\).) Tj ET
+BT /F1 12 Tf 56 328 Td (TypeScript agent - llm.ts \(provider-agnostic\) -> compile_policy.ts ->) Tj ET
+BT /F1 12 Tf 56 311 Td (  decide.ts. Ordinary key, ZERO privileged roles.) Tj ET
+BT /F1 12 Tf 56 277 Td (Contracts frozen at v1.0-contracts-frozen; 4/4 Foundry scenes run offline) Tj ET
+BT /F1 12 Tf 56 260 Td (on REAL Attestcoin proof fixtures.) Tj ET
+endstream
+endobj
+15 0 obj
+<< /Length 821 >>
+stream
+BT /F2 30 Tf 56 454 Td (Five scenes, all live on CC3 testnet) Tj ET
+BT /F1 12 Tf 56 413 Td (1  Honest \(3x proven repayments\)  -> 50 PGC released     0x0fe91edf..7b33e1) Tj ET
+BT /F1 12 Tf 56 396 Td (2  Fabrication \(tampered byte\)  -> PRECOMPILE REJECTED  0x1701337e..e60838) Tj ET
+BT /F1 12 Tf 56 379 Td (3  Inflation \(claimed 500, proven 50\) -> released 50     0x8c609657..90f3fb) Tj ET
+BT /F1 12 Tf 56 362 Td (4a Strict policy \(needs 5, has 3\) -> REVERTED            0xc89c97c2..81612) Tj ET
+BT /F1 12 Tf 56 345 Td (4b Agent beyond own cap \(600 > 500\) -> REVERTED          0xd2b53bf5..ede21) Tj ET
+BT /F1 12 Tf 56 328 Td (5  Live AI: English -> policy -> decision -> 50 PGC      0x4769f3a7..e7b6ff) Tj ET
+BT /F1 12 Tf 56 294 Td (Full audit trail: deployments.md - every hash a real testnet transaction.) Tj ET
+endstream
+endobj
+16 0 obj
+<< /Length 821 >>
+stream
+BT /F2 30 Tf 56 454 Td (Decision receipts: the AI vs the proof, forever) Tj ET
+BT /F1 12 Tf 56 413 Td (event CreditReleased\() Tj ET
+BT /F1 12 Tf 56 396 Td (  uint256 indexed policyId, address indexed borrower,) Tj ET
+BT /F1 12 Tf 56 379 Td (  uint256 releasedAmount,  // decoded from proofs - what moved) Tj ET
+BT /F1 12 Tf 56 362 Td (  uint256 claimedAmount,   // what the AI said) Tj ET
+BT /F1 12 Tf 56 345 Td (  bytes32 rationaleHash,   // keccak256 of the LLM's own reasoning) Tj ET
+BT /F1 12 Tf 56 328 Td (  uint256 proofsUsed\);) Tj ET
+BT /F1 12 Tf 56 294 Td (Scene 3 on-chain: released=50, claimed=500 - the inflation attempt is) Tj ET
+BT /F1 12 Tf 56 277 Td (permanently recorded next to the truth. Any auditor can hash the) Tj ET
+BT /F1 12 Tf 56 260 Td (rationale and compare it against the proven facts.) Tj ET
+endstream
+endobj
+17 0 obj
+<< /Length 860 >>
+stream
+BT /F2 30 Tf 56 454 Td (Attestcoin Protocol depth + resilience) Tj ET
+BT /F1 12 Tf 56 413 Td (22 verifyAndEmit calls across 7 committed policies \(21 verified,) Tj ET
+BT /F1 12 Tf 56 396 Td (1 rejected - the fabrication scene\). Full EVM receipts; event logs) Tj ET
+BT /F1 12 Tf 56 379 Td (decoded on-chain via the official EvmV1Decoder.) Tj ET
+BT /F1 12 Tf 56 362 Td (Synchronous in-tx verification; merkle + continuity proofs from the) Tj ET
+BT /F1 12 Tf 56 345 Td (Proof Builder; per-policy replay guards; multi-proof aggregation by default.) Tj ET
+BT /F1 12 Tf 56 311 Td (Resilience, proven live: an RPC ETIMEDOUT hit mid-demo. The agent is) Tj ET
+BT /F1 12 Tf 56 294 Td (resumable - it submits only proofs not yet on record \(the replay guard) Tj ET
+BT /F1 12 Tf 56 277 Td (makes the boundary exact\) - and finished the scene without manual repair.) Tj ET
+endstream
+endobj
+18 0 obj
+<< /Length 878 >>
+stream
+BT /F2 30 Tf 56 454 Td (What's next) Tj ET
+BT /F1 12 Tf 56 413 Td (Mainnet policy templates + multi-source-chain histories \(chainKey routing) Tj ET
+BT /F1 12 Tf 56 396 Td (  is already per-policy\).) Tj ET
+BT /F1 12 Tf 56 379 Td (Richer compiled policies \(rate limits, cooldowns\) behind the same) Tj ET
+BT /F1 12 Tf 56 362 Td (  commit-then-enforce pattern.) Tj ET
+BT /F1 12 Tf 56 345 Td (Attested decision receipts: sign rationale + evidence bundle, anchor the) Tj ET
+BT /F1 12 Tf 56 328 Td (  signature next to rationaleHash.) Tj ET
+BT /F1 12 Tf 56 311 Td (Agent reputation: CreditReleased claimed-vs-released is a public,) Tj ET
+BT /F1 12 Tf 56 294 Td (  machine-readable honesty score for AI underwriters.) Tj ET
+BT /F2 15 Tf 56 255 Td (ProofGate: natural-language policy in, cryptographic proof out.) Tj ET
+BT /F1 12 Tf 56 238 Td (github.com/Pizzylee001/proofgate) Tj ET
+endstream
+endobj
+xref
+0 19
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000159 00000 n 
+0000000229 00000 n 
+0000000304 00000 n 
+0000000441 00000 n 
+0000000578 00000 n 
+0000000715 00000 n 
+0000000852 00000 n 
+0000000989 00000 n 
+0000001127 00000 n 
+0000001265 00000 n 
+0000001962 00000 n 
+0000002769 00000 n 
+0000003714 00000 n 
+0000004587 00000 n 
+0000005460 00000 n 
+0000006372 00000 n 
+trailer
+<< /Size 19 /Root 1 0 R >>
+startxref
+7302
+%%EOF

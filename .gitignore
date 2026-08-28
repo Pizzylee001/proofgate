@@ -5,3 +5,5 @@ cache/
 broadcast/
 node_modules/
 lib/
+.venv-deck/
+chrome-install.log
