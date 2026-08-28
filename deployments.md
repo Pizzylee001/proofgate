@@ -62,6 +62,17 @@ All three: Transfer(borrower `0x7Fe2...5d27B` -> vault `0xd1F1...81A38`) on PGUS
 
 ## Day 4 — adversarial scenes live on testnet
 
+### Scene 3 — Inflation (SUCCEEDED, released decoded 50 not claimed 500)
+- Policy #2 "Generous" (`policies/2.md`, cap 500 / min 3): commit tx
+  `0x281a60b201e2ea683bd66b95b42809c5b56c9bf32cf2480041deb484823be0cb`
+  (policyId=2, policyTextHash `0x76fa3bb2d5dfe73cdea013b2552bc63901eb2263d4d268c98a5c8ce0a92d7bb1`).
+- Same three fixture proofs resubmitted under policyId 2 (per-policy replay guard
+  makes this legitimate): `0x3e8a1af0...`, `0xfd6d899b...`, `0xeb8f7045...`.
+- requestCredit claimedAmount=500 -> tx `0x8c6096578855da22b762f26ec9da49aa08b169f794ea259894f2aed57d90f3fb` (status 1)
+  CreditReleased: released=50, claimed=500, proofsUsed=3,
+  rationaleHash=0xd8141708e0e060322de334ec954d8a0ea5ed4153318784d9d784d560d0245c33.
+- Borrower PGC balance: 50 -> 100.
+
 ### Scene 2 — Fabrication (REVERTED, as designed)
 - Tampered fixture #1 (repayment amount 20 -> 21 PGUSD inside txBytes) and
   submitted under policyId 1.
