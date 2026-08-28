@@ -117,6 +117,18 @@ All three: Transfer(borrower `0x7Fe2...5d27B` -> vault `0xd1F1...81A38`) on PGUS
   (keccak of the LLM's own rationale — the decision receipt).
 - Borrower PGC balance: 100 -> 150.
 
+## Day 6 — Scene 5 encore (policy #6, inside `yarn demo` run)
+
+- Policy #6 — same LLM-compiled English text, committed inside the demo run:
+  tx `0x5dfd1b2d65fe231dff0204b9060fff484b2a36e869abc1235d3e066e9eb476f3`.
+- Proof submissions under policyId 6: `0x5fea3bd4...`, `0xf289d744...` and a third
+  that landed despite an RPC receipt timeout (`read ETIMEDOUT` — transient; the
+  decide script is resumable: it submits only proofs not yet on record).
+- LLM decision (approved 50/75 cap) -> requestCredit tx
+  `0xd1a27c4491628920fed39faa814b01b0e16eb90c3ded7c9e523a678179727834` (status 1),
+  rationaleHash `0x19a09a95259cdac9819dd6a05aa7b7021c3ff34d0dbc5d167c31f778a667b9e9`.
+- Borrower PGC balance: 150 -> 200.
+
 ## `.env` additions (never commit `.env`)
 
 ```

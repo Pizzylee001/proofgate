@@ -93,12 +93,15 @@ async function main(): Promise<void> {
   console.log(`\nproven repayment facts (${provenRepayments.length} Attestcoin-verified txs):`);
   console.log(JSON.stringify(provenRepayments, null, 2));
 
-  // 3. Ensure the proofs are on record under THIS policyId.
-  const onRecord = await gate.provenRepaymentCount(policyId, borrower);
-  if (onRecord === 0n) {
-    console.log('\nno proofs on record under this policy — submitting the proven history...');
-    for (const [i, f] of fixtures.entries()) {
-      const tx = await gate.submitRepaymentProof(policyId, borrower, fixtureToTuple(f));
+  // 3. Ensure the proofs are on record under THIS policyId. Resumable: if a
+  //    previous run died mid-submission (RPC timeout etc.), submit only the
+  //    proofs not yet recorded. The per-policy replay guard rejects resubmission
+  //    of recorded ones, so starting at index `onRecord` is exactly right.
+  const onRecord = Number(await gate.provenRepaymentCount(policyId, borrower));
+  if (onRecord < fixtures.length) {
+    console.log(`\n${onRecord} proof(s) already on record — submitting the remaining ${fixtures.length - onRecord}...`);
+    for (let i = onRecord; i < fixtures.length; i++) {
+      const tx = await gate.submitRepaymentProof(policyId, borrower, fixtureToTuple(fixtures[i]));
       const rcpt = await tx.wait();
       console.log(`  proof ${i + 1}/${fixtures.length} verified on-chain: ${rcpt.hash}`);
     }
