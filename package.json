@@ -1,14 +1,16 @@
 {
   "name": "proofgate",
   "version": "1.0.0",
-  "description": "**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**",
-  "main": "index.js",
+  "description": "ProofGate \u2014 AI-compiled lending policies enforced on-chain against Attestcoin Protocol cross-chain proofs (BUIDL CTC 2026 Fall, AI track)",
   "directories": {
     "lib": "lib",
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "forge test",
+    "demo": "node scripts/demo.ts",
+    "compile-policy": "node agent/compile_policy.ts",
+    "decide": "node agent/decide.ts"
   },
   "repository": {
     "type": "git",
@@ -16,7 +18,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "type": "commonjs",
   "bugs": {
     "url": "https://github.com/Pizzylee001/proofgate/issues"

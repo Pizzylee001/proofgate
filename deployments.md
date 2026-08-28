@@ -129,6 +129,15 @@ All three: Transfer(borrower `0x7Fe2...5d27B` -> vault `0xd1F1...81A38`) on PGUS
   rationaleHash `0x19a09a95259cdac9819dd6a05aa7b7021c3ff34d0dbc5d167c31f778a667b9e9`.
 - Borrower PGC balance: 150 -> 200.
 
+## Day 6 — Full `yarn demo` verification run (policy #7)
+
+- Scenes 1-4 narrated with the real testnet tx hashes above; scene 5 live:
+  policy #7 LLM-compiled and committed, 3 proofs verified on-chain
+  (`0xa7c01a83...`, `0x0a3d01a8...`, `0x269f321a...`), LLM approved 50,
+  requestCredit tx `0xc71d5711db0c977f6759802a3b93a410487143f79b8e060f3f52d2a725b03388`
+  (status 1), rationaleHash `0xadd445eccd461a035f8daa50a5265b3f9c10fc0f25419d245f484b2059156c10`.
+- Borrower PGC balance: 200 -> 250. Total runtime ~113s.
+
 ## `.env` additions (never commit `.env`)
 
 ```
