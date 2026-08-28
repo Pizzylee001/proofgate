@@ -24,6 +24,7 @@
   "homepage": "https://github.com/Pizzylee001/proofgate#readme",
   "dependencies": {
     "@gluwa/usc-contracts": "^0.2.0",
-    "@gluwa/usc-sdk": "^0.18.0"
+    "@gluwa/usc-sdk": "^0.18.0",
+    "openai": "^7.8.0"
   }
 }
