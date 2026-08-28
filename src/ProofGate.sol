@@ -11,11 +11,11 @@ import {EvmV1Decoder} from "@gluwa/usc-contracts/common/EvmV1Decoder.sol";
 /// @notice The gate between an AI agent's lending decision and on-chain credit.
 /// @dev A release requires BOTH: (a) Attestcoin Protocol proofs that the claimed
 ///      repayments actually happened on the source chain, verified synchronously
-///      by the Native Query Verifier precompile, and (b) compliance with the
-///      lender's policy committed to PolicyRegistry BEFORE the borrower applied.
-///      The AI interprets the policy; this contract enforces it. The agent has
-///      no privileged role — anyone may submit, and the released amount is the
-///      decoded, proven total, never the agent's claimed amount.
+///      by the Native Query Verifier precompile as they are submitted, and
+///      (b) compliance with the lender's policy committed to PolicyRegistry
+///      BEFORE the borrower applied. The AI interprets the policy; this contract
+///      enforces it. The agent has no privileged role — anyone may submit, and
+///      the released amount is the decoded, proven total, never the claim.
 contract ProofGate is IProofGate {
     /// @dev keccak256("Transfer(address,address,uint256)") — verified with cast and ethers.
     ///      (An earlier draft carried the common misquote ending ...c68c70b9.)
@@ -30,6 +30,9 @@ contract ProofGate is IProofGate {
     ///      same proven repayment event.
     mapping(uint256 policyId => mapping(bytes32 queryId => bool used)) public processedQueries;
 
+    /// @dev Repayments proven for a (policy, borrower), consumed by a release.
+    mapping(uint256 policyId => mapping(address borrower => ProvenRepayment[])) internal _provenRepayments;
+
     constructor(address policyRegistry_, address creditToken_, address verifier_) {
         require(policyRegistry_ != address(0), "Registry cannot be zero");
         require(creditToken_ != address(0), "Credit token cannot be zero");
@@ -40,33 +43,24 @@ contract ProofGate is IProofGate {
     }
 
     /// @inheritdoc IProofGate
-    function policyRegistry() external view returns (address) {
-        return address(_policyRegistry);
+    function submitRepaymentProof(uint256 policyId, address borrower, Proof calldata proof) external {
+        // Registry reverts on unknown policyId.
+        IPolicyRegistry.Policy memory policy = _policyRegistry.getPolicy(policyId);
+
+        (uint256 amount, bytes32 queryId) = _processProof(policy, policyId, borrower, proof);
+
+        _provenRepayments[policyId][borrower].push(ProvenRepayment({amount: amount, queryId: queryId}));
+        emit RepaymentProven(policyId, borrower, amount, queryId);
     }
 
     /// @inheritdoc IProofGate
-    function creditToken() external view returns (address) {
-        return address(_creditToken);
-    }
-
-    /// @inheritdoc IProofGate
-    function requestCredit(
-        uint256 policyId,
-        address borrower,
-        Proof[] calldata proofs,
-        AgentDecision calldata agentDecision
-    ) external {
+    function requestCredit(uint256 policyId, address borrower, AgentDecision calldata agentDecision) external {
         // 1. Load the committed policy (registry reverts on unknown policyId).
         IPolicyRegistry.Policy memory policy = _policyRegistry.getPolicy(policyId);
 
-        uint256 decodedTotal;
-        uint256 proofCount = proofs.length;
-
-        for (uint256 i; i < proofCount; ++i) {
-            decodedTotal += _processProof(policy, policyId, borrower, proofs[i]);
-        }
-
         // 6. Enough proven history?
+        ProvenRepayment[] storage proven = _provenRepayments[policyId][borrower];
+        uint256 proofCount = proven.length;
         require(proofCount >= policy.minCompletedRepayments, "Not enough proven repayments");
 
         // 7. The agent's decision must be positive and within its own policy cap.
@@ -74,7 +68,15 @@ contract ProofGate is IProofGate {
         require(agentDecision.claimedAmount <= policy.maxLoanAmount, "Agent claim exceeds policy cap");
 
         // 8. Release the DECODED, proven total, capped by policy — never the claim.
+        uint256 decodedTotal;
+        for (uint256 i; i < proofCount; ++i) {
+            decodedTotal += proven[i].amount;
+        }
         uint256 releasedAmount = decodedTotal > policy.maxLoanAmount ? policy.maxLoanAmount : decodedTotal;
+
+        // Consume the proven history: it can never mint twice.
+        delete _provenRepayments[policyId][borrower];
+
         _creditToken.mint(borrower, releasedAmount);
 
         // 9. Decision receipt: the audit trail of the AI vs the proof.
@@ -88,15 +90,40 @@ contract ProofGate is IProofGate {
         );
     }
 
+    /// @inheritdoc IProofGate
+    function provenRepaymentCount(uint256 policyId, address borrower) external view returns (uint256) {
+        return _provenRepayments[policyId][borrower].length;
+    }
+
+    /// @inheritdoc IProofGate
+    function provenRepayment(uint256 policyId, address borrower, uint256 index)
+        external
+        view
+        returns (uint256 amount, bytes32 queryId)
+    {
+        ProvenRepayment storage r = _provenRepayments[policyId][borrower][index];
+        return (r.amount, r.queryId);
+    }
+
+    /// @inheritdoc IProofGate
+    function policyRegistry() external view returns (address) {
+        return address(_policyRegistry);
+    }
+
+    /// @inheritdoc IProofGate
+    function creditToken() external view returns (address) {
+        return address(_creditToken);
+    }
+
     /// @notice Steps 2–5 for a single proof: verify, replay-guard, decode, enforce.
-    /// @dev Factored out of requestCredit to stay under the stack depth limit.
-    /// @return amount The decoded, proven repayment amount for this proof.
+    /// @return amount The decoded, proven repayment amount.
+    /// @return queryId The replay-guard id of the proof.
     function _processProof(
         IPolicyRegistry.Policy memory policy,
         uint256 policyId,
         address borrower,
         Proof calldata p
-    ) internal returns (uint256 amount) {
+    ) internal returns (uint256 amount, bytes32 queryId) {
         // 2. Verify the proof against the Attestcoin Protocol precompile.
         INativeQueryVerifier.MerkleProof memory merkleProof =
             INativeQueryVerifier.MerkleProof({root: p.merkleRoot, siblings: p.siblings});
@@ -110,7 +137,7 @@ contract ProofGate is IProofGate {
 
         // 3. Replay guard, per (policyId, queryId).
         uint64 txIndex = _verifier.calculateTxIndex(merkleProof);
-        bytes32 queryId = keccak256(abi.encodePacked(p.chainKey, p.blockHeight, txIndex));
+        queryId = keccak256(abi.encodePacked(p.chainKey, p.blockHeight, txIndex));
         require(!processedQueries[policyId][queryId], "Replay: query already used for this policy");
         processedQueries[policyId][queryId] = true;
 

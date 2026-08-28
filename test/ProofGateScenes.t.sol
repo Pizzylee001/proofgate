@@ -16,8 +16,8 @@ import {EvmV1Decoder} from "@gluwa/usc-contracts/common/EvmV1Decoder.sol";
 /// @dev Uses MockNativeQueryVerifier (the real Attestcoin precompile at
 ///      0x0000000000000000000000000000000000000FD2 does not exist on local
 ///      test chains) plus synthetic EvmV1Decoder-compatible tx payloads.
-///      Day 3 replaces the synthetic payloads with real Attestcoin fixtures
-///      from test/fixtures/*.json without touching the assertions.
+///      Real Attestcoin fixtures in test/fixtures/*.json replace the
+///      synthetic payloads without touching the assertions.
 contract ProofGateScenesTest is Test {
     ProofGate internal gate;
     PolicyRegistry internal registry;
@@ -50,20 +50,14 @@ contract ProofGateScenesTest is Test {
     // ---------------------------------------------------------------------
     function test_Scene2_FabricatedProof_Reverts() public {
         uint256 policyId = _commitPolicy(lender, 1000 ether, 1);
-        IProofGate.Proof[] memory proofs = new IProofGate.Proof[](1);
-        proofs[0] = _proof(1000, REPAYMENT_AMOUNT);
 
         // The Attestcoin precompile (here: the mock) refuses the fabricated proof.
         mockVerifier.setVerificationResult(false);
 
         vm.expectRevert(bytes("Proof verification failed"));
-        gate.requestCredit(
-            policyId,
-            borrower,
-            proofs,
-            IProofGate.AgentDecision({approved: true, claimedAmount: REPAYMENT_AMOUNT, rationale: "trust me"})
-        );
+        gate.submitRepaymentProof(policyId, borrower, _proof(1000, REPAYMENT_AMOUNT));
 
+        assertEq(gate.provenRepaymentCount(policyId, borrower), 0);
         assertEq(creditToken.balanceOf(borrower), 0);
     }
 
@@ -75,14 +69,13 @@ contract ProofGateScenesTest is Test {
         uint256 policyId = _commitPolicy(lender, 1000 ether, 1);
         uint256 claimed = 500 ether;
 
-        IProofGate.Proof[] memory proofs = new IProofGate.Proof[](1);
-        proofs[0] = _proof(1000, REPAYMENT_AMOUNT);
+        gate.submitRepaymentProof(policyId, borrower, _proof(1000, REPAYMENT_AMOUNT));
+        assertEq(gate.provenRepaymentCount(policyId, borrower), 1);
 
         vm.recordLogs();
         gate.requestCredit(
             policyId,
             borrower,
-            proofs,
             IProofGate.AgentDecision({approved: true, claimedAmount: claimed, rationale: "inflated rationale"})
         );
 
@@ -91,6 +84,7 @@ contract ProofGateScenesTest is Test {
         assertEq(claimedOut, claimed, "claim is recorded for the audit trail");
         assertEq(proofsUsed, 1);
         assertEq(creditToken.balanceOf(borrower), REPAYMENT_AMOUNT);
+        assertEq(gate.provenRepaymentCount(policyId, borrower), 0, "proofs must be consumed");
     }
 
     // ---------------------------------------------------------------------
@@ -99,28 +93,28 @@ contract ProofGateScenesTest is Test {
     // committed cap reverts.
     // ---------------------------------------------------------------------
     function test_Scene4a_PolicyViolation_StrictReverts_LenientSucceeds_BeyondCapReverts() public {
-        IProofGate.Proof[] memory proofs = new IProofGate.Proof[](3);
-        for (uint256 i = 0; i < 3; i++) {
-            proofs[i] = _proof(uint64(1000 + i), REPAYMENT_AMOUNT);
-        }
-
-        // Strict lender demands 5 proven repayments; history has 3.
+        // Strict lender demands 5 proven repayments; history will have 3.
         uint256 strictPolicyId = _commitPolicy(strictLender, 1000 ether, 5);
+        for (uint256 i = 0; i < 3; i++) {
+            gate.submitRepaymentProof(strictPolicyId, borrower, _proof(uint64(1000 + i), REPAYMENT_AMOUNT));
+        }
         vm.expectRevert(bytes("Not enough proven repayments"));
         gate.requestCredit(
             strictPolicyId,
             borrower,
-            proofs,
             IProofGate.AgentDecision({approved: true, claimedAmount: 3 * REPAYMENT_AMOUNT, rationale: "strict try"})
         );
 
-        // Lenient lender demands 3; the same history satisfies it.
+        // Lenient lender demands 3; the same proven history satisfies it
+        // (replay guard is per policy, so re-submitting here is legitimate).
         uint256 lenientPolicyId = _commitPolicy(lender, 1000 ether, 3);
+        for (uint256 i = 0; i < 3; i++) {
+            gate.submitRepaymentProof(lenientPolicyId, borrower, _proof(uint64(1000 + i), REPAYMENT_AMOUNT));
+        }
         vm.recordLogs();
         gate.requestCredit(
             lenientPolicyId,
             borrower,
-            proofs,
             IProofGate.AgentDecision({approved: true, claimedAmount: 3 * REPAYMENT_AMOUNT, rationale: "lenient ok"})
         );
         (uint256 released,,, uint256 proofsUsed) = _lastCreditReleased();
@@ -129,11 +123,13 @@ contract ProofGateScenesTest is Test {
 
         // The agent then approves beyond its own committed cap (100 < claim 150).
         uint256 cappedPolicyId = _commitPolicy(lender, 2 * REPAYMENT_AMOUNT, 3);
+        for (uint256 i = 0; i < 3; i++) {
+            gate.submitRepaymentProof(cappedPolicyId, borrower, _proof(uint64(1000 + i), REPAYMENT_AMOUNT));
+        }
         vm.expectRevert(bytes("Agent claim exceeds policy cap"));
         gate.requestCredit(
             cappedPolicyId,
             borrower,
-            proofs,
             IProofGate.AgentDecision({approved: true, claimedAmount: 3 * REPAYMENT_AMOUNT, rationale: "beyond cap"})
         );
     }
@@ -147,16 +143,15 @@ contract ProofGateScenesTest is Test {
         uint256 policyId = _commitPolicy(lender, 1000 ether, 3);
         uint256 expectedReleased = 3 * REPAYMENT_AMOUNT;
 
-        IProofGate.Proof[] memory proofs = new IProofGate.Proof[](3);
         for (uint256 i = 0; i < 3; i++) {
-            proofs[i] = _proof(uint64(1000 + i), REPAYMENT_AMOUNT);
+            gate.submitRepaymentProof(policyId, borrower, _proof(uint64(1000 + i), REPAYMENT_AMOUNT));
         }
+        assertEq(gate.provenRepaymentCount(policyId, borrower), 3);
 
         vm.recordLogs();
         gate.requestCredit(
             policyId,
             borrower,
-            proofs,
             IProofGate.AgentDecision({approved: true, claimedAmount: expectedReleased, rationale: "honest rationale"})
         );
 
@@ -166,6 +161,15 @@ contract ProofGateScenesTest is Test {
         assertEq(rationaleHash, keccak256(bytes("honest rationale")), "decision receipt mismatch");
         assertEq(proofsUsed, 3);
         assertEq(creditToken.balanceOf(borrower), expectedReleased, "credit token did not move");
+        assertEq(gate.provenRepaymentCount(policyId, borrower), 0, "proofs must be consumed");
+
+        // And the same history cannot mint twice.
+        vm.expectRevert(bytes("Not enough proven repayments"));
+        gate.requestCredit(
+            policyId,
+            borrower,
+            IProofGate.AgentDecision({approved: true, claimedAmount: expectedReleased, rationale: "double dip"})
+        );
     }
 
     // ---------------------------------------------------------------------
@@ -241,6 +245,7 @@ contract ProofGateScenesTest is Test {
     ///      gate event would assert against the wrong log.)
     function _lastCreditReleased()
         internal
+        view
         returns (uint256 released, uint256 claimed, bytes32 rationaleHash, uint256 proofsUsed)
     {
         Vm.Log[] memory logs = vm.getRecordedLogs();
