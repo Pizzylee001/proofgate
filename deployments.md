@@ -73,6 +73,27 @@ All three: Transfer(borrower `0x7Fe2...5d27B` -> vault `0xd1F1...81A38`) on PGUS
   rationaleHash=0xd8141708e0e060322de334ec954d8a0ea5ed4153318784d9d784d560d0245c33.
 - Borrower PGC balance: 50 -> 100.
 
+### Scene 4a — Policy violation: strict diverges (REVERTED, as designed)
+- Policy #3 "Conservative" (`policies/3.md`, cap 500 / min 5): commit tx
+  `0x449dca9c3c31cef178d08f778a09299298f9970ae45cc8fa26305d0d7a5168c0`
+  (policyId=3, policyTextHash `0x17c71a4e446f051cc1a20d8849c19ef2b53ec08aa242560690790659af9e74f6`).
+- Same three proofs accepted under policyId 3 (`0x0d3d9dda...`, `0x4f7c92da...`,
+  `0xb1435cd1...`) — proofs verify fine; the POLICY is what differs.
+- requestCredit REVERTED on-chain:
+  `0xc89c97c2f8e138fce22604392bff00f1ec501b681239cf83cd7354cfd8e81612` (status 0),
+  reason "Not enough proven repayments". Same history released 50 under Policy #2.
+
+### Scene 4b — Agent beyond its own committed cap (REVERTED, as designed)
+- Policy #4 "Generous (second pool)" (`policies/4.md`, cap 500 / min 3): commit tx
+  `0xe0f85477566a971fbf6fa3a79b7e129c89bf58bf15fbeedf85c6a4eae367b2fd`
+  (policyId=4, policyTextHash `0xddaeda4f27962e33a24e678e26de77007f0600a3f57c710bac8144b4acc1a03b`).
+- Three proofs accepted under policyId 4 (`0x96548193...`, `0xd0d8f4f1...`,
+  `0x8f61af66...`).
+- requestCredit with claimedAmount=600 REVERTED on-chain:
+  `0xd2b53bf5a44030e567b4df780767470a8db6e0d8c5050847d3be81ce0e8ede21` (status 0),
+  reason "Agent claim exceeds policy cap". The agent cannot outbid its lender's
+  committed policy.
+
 ### Scene 2 — Fabrication (REVERTED, as designed)
 - Tampered fixture #1 (repayment amount 20 -> 21 PGUSD inside txBytes) and
   submitted under policyId 1.
