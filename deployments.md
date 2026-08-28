@@ -29,7 +29,12 @@ Deployer (agent wallet): 0x65be7B4E45E3E7fd415865540407fb021937f5A3
 |---|---|
 | PGUSD test token | `0x736AA38bc60384DB13b03b2D6aa1D810230C9Dd0` (deploy tx `0xae5bcac55f3d0e4713cc74f13e2fba0d210a2536437052c1ac2d8fb95dc7e3e5`) |
 | Vault (repayment recipient EOA) | `0xd1F1FA3CbA5B6532a01C842c43D26FCE54E81A38` |
-| Repayment txs | TBD (step 4) |
+| Repayment 1: 20 PGUSD (block 11584692) | `0xfb8fb000d2df1355eca8c35621ad583d0eb01472f59d2eedd84de84e9c388a3d` |
+| Repayment 2: 15 PGUSD (block 11584695) | `0x86ad4225977a8fe47f1fffc28e9c6768d3499e35712b535f22e1be636181f6b7` |
+| Repayment 3: 15 PGUSD (block 11584698) | `0x5764115ac983d87a48a7eb6463a0acc9ce449f6861ed8cdd6b64b3044700af4d` |
+
+All three: Transfer(borrower `0x7Fe2...5d27B` -> vault `0xd1F1...81A38`) on PGUSD
+`0x736AA38bc60384DB13b03b2D6aa1D810230C9Dd0`. Total proven: 50 PGUSD.
 
 ## Policy commitments
 
