@@ -101,6 +101,22 @@ All three: Transfer(borrower `0x7Fe2...5d27B` -> vault `0xd1F1...81A38`) on PGUS
   (status 0). Revert reason from the precompile itself: "Merkle proof validation failed".
   No proof, no credit.
 
+## Day 6 — Scene 5: live AI-compiled policy + AI decision
+
+- Policy #5 — LLM-compiled from English ("Lend up to 75 PGUSD to anyone with
+  3 or more completed repayments to my vault on Ethereum Sepolia, paid in PGUSD."):
+  commit tx `0x2afe0ed1f7aeeaa430cac3d9e728a45b74821efae3689d08571f7b8ca7c35b47`
+  (policyId=5, cap 75 / min 3, policyTextHash `0x89229857638d6b7083868ac1871fff396e51c1e13189502ce18924e7bd14c389`).
+  English + compiled JSON + compiler rationale in `policies/5.md`.
+- Proven history submitted under policyId 5: `0x3bec27e1...`, `0xf177c706...`,
+  `0xf6b1f5dc...` (all status 1, verified by the precompile).
+- LLM decision: approved 50 PGUSD (sum of proven repayments, within the 75 cap).
+- requestCredit tx `0x4769f3a734df10aaaf842fb55c3ac6817441bb924cb1479935be72f725e7b6ff`
+  -> CreditReleased released=50, claimed=50, proofsUsed=3,
+  rationaleHash=`0x3ea3fbdef481d4e561d784388b2399cd95e68b02b5a5d0986e69adc70bc7f063`
+  (keccak of the LLM's own rationale — the decision receipt).
+- Borrower PGC balance: 100 -> 150.
+
 ## `.env` additions (never commit `.env`)
 
 ```
