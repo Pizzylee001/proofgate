@@ -60,6 +60,15 @@ All three: Transfer(borrower `0x7Fe2...5d27B` -> vault `0xd1F1...81A38`) on PGUS
 - Borrower PGC balance after release: 50.0 (verified via cast).
 - Full proof payloads saved in test/fixtures/proofs.json.
 
+## Day 4 — adversarial scenes live on testnet
+
+### Scene 2 — Fabrication (REVERTED, as designed)
+- Tampered fixture #1 (repayment amount 20 -> 21 PGUSD inside txBytes) and
+  submitted under policyId 1.
+- REVERTED on-chain: `0x1701337e3cab0861e8bd85b57dfb4a0e39d020c0d784d279ffa0adcccde60838`
+  (status 0). Revert reason from the precompile itself: "Merkle proof validation failed".
+  No proof, no credit.
+
 ## `.env` additions (never commit `.env`)
 
 ```
