@@ -27,19 +27,25 @@ Deployer (agent wallet): 0x65be7B4E45E3E7fd415865540407fb021937f5A3
 
 | Item | Value |
 |---|---|
-| PGUSD test token | TBD (step 2) |
-| Vault (repayment recipient EOA) | TBD (step 2) |
+| PGUSD test token | `0x736AA38bc60384DB13b03b2D6aa1D810230C9Dd0` (deploy tx `0xae5bcac55f3d0e4713cc74f13e2fba0d210a2536437052c1ac2d8fb95dc7e3e5`) |
+| Vault (repayment recipient EOA) | `0xd1F1FA3CbA5B6532a01C842c43D26FCE54E81A38` |
 | Repayment txs | TBD (step 4) |
 
 ## Policy commitments
 
-TBD (step 3)
+- **Policy #1** — "Proof-of-Repayment Microcredit" (`policies/1.md`), commit tx
+  `0x363c7f2da7667632b8f820c903e6780ad899b764e3a3ef30cf7958ed79787b47`.
+  Fields: maxLoanAmount=50 PGUSD, minCompletedRepayments=3, sourceChainId=11155111,
+  sourceChainKey=1, requiredSourceToken=PGUSD, vault=`0xd1F1...81A38`,
+  policyTextHash=`0x5aa7c042a59bee6a2fb1b2aa28e10de343d0e2b19fd1ab67e8b73e65777da667`.
+  Lender: `0x65be7B4E45E3E7fd415865540407fb021937f5A3` (funded tutorial key doubles
+  as lender; the demo-critical split is agent 0x65be != borrower 0x7Fe2).
 
 ## `.env` additions (never commit `.env`)
 
 ```
-PROOFGATE_VAULT_ADDRESS=        # TBD step 2
-PGUSD_TOKEN_ADDRESS=            # TBD step 2
+PROOFGATE_VAULT_ADDRESS=0xd1F1FA3CbA5B6532a01C842c43D26FCE54E81A38
+PGUSD_TOKEN_ADDRESS=0x736AA38bc60384DB13b03b2D6aa1D810230C9Dd0
 POLICY_REGISTRY_ADDRESS=0x4E4Ce51642053DD43eEa17840878e6cC8463aD6C
 CREDIT_TOKEN_ADDRESS=0x62aBdb6fCB4Fee617542Fc1c42a0bD3E96d073fD
 PROOFGATE_ADDRESS=0xb9B4ec47C1DEE16254f35c2699384542082AE731
