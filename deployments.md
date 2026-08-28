@@ -46,6 +46,20 @@ All three: Transfer(borrower `0x7Fe2...5d27B` -> vault `0xd1F1...81A38`) on PGUS
   Lender: `0x65be7B4E45E3E7fd415865540407fb021937f5A3` (funded tutorial key doubles
   as lender; the demo-critical split is agent 0x65be != borrower 0x7Fe2).
 
+## Day 3 — live end-to-end run (Scene 1 on testnet)
+
+- submitRepaymentProof x3 (each verified by the real precompile 0x...0FD2):
+  - `0xd0e48c0ab414178c3ca47a2ec3d2a75efa672d8d3f0836f2f5eda2e96adf83e9` (20 PGUSD, height 11584692)
+  - `0x2e8fbd3eaa267f4f57db52b4c84891877247a03c301ca29f494d9a086883da7e` (15 PGUSD, height 11584695)
+  - `0x708b7cfc2dd2a967069ce6b52f46643bab17cbe367075ea8be9e0e86abe3ac81` (15 PGUSD, height 11584698)
+- requestCredit (agent 0x65be != borrower 0x7Fe2):
+  `0x0fe91edf0f72a41bb24fb2aa4eb427d3377f6258fa104639f078a1eefe7b33e1`
+  -> CreditReleased(policyId=1, borrower=0x7Fe2..., released=50 PGC, claimed=50,
+     rationaleHash=0x6e837a380d8f03a0ccedea70894432ea38ef3221e679fbaa5dda9a21db1b0ffe,
+     proofsUsed=3)
+- Borrower PGC balance after release: 50.0 (verified via cast).
+- Full proof payloads saved in test/fixtures/proofs.json.
+
 ## `.env` additions (never commit `.env`)
 
 ```
