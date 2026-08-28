@@ -2,18 +2,27 @@
 pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
+import {Vm} from "forge-std/Vm.sol";
 import {INativeQueryVerifier} from "../src/interfaces/INativeQueryVerifier.sol";
 import {IPolicyRegistry} from "../src/interfaces/IPolicyRegistry.sol";
 import {IProofGate} from "../src/interfaces/IProofGate.sol";
+import {PolicyRegistry} from "../src/PolicyRegistry.sol";
+import {CreditToken} from "../src/CreditToken.sol";
+import {ProofGate} from "../src/ProofGate.sol";
+import {MockNativeQueryVerifier} from "../src/MockNativeQueryVerifier.sol";
+import {EvmV1Decoder} from "@gluwa/usc-contracts/common/EvmV1Decoder.sol";
 
-/// @title ProofGate demo scenes, written as tests BEFORE the implementation.
-/// @notice Adversarial scenes first, honest scene last. All tests are expected
-///         to FAIL until PolicyRegistry + ProofGate are implemented (Day 2).
-/// @dev Proof data is placeholder until real fixtures from the Attestcoin
-///      Protocol are saved to test/fixtures/*.json (Day 3).
+/// @title ProofGate demo scenes — adversarial first, honest last.
+/// @dev Uses MockNativeQueryVerifier (the real Attestcoin precompile at
+///      0x0000000000000000000000000000000000000FD2 does not exist on local
+///      test chains) plus synthetic EvmV1Decoder-compatible tx payloads.
+///      Day 3 replaces the synthetic payloads with real Attestcoin fixtures
+///      from test/fixtures/*.json without touching the assertions.
 contract ProofGateScenesTest is Test {
-    IProofGate internal gate;
-    IPolicyRegistry internal registry;
+    ProofGate internal gate;
+    PolicyRegistry internal registry;
+    CreditToken internal creditToken;
+    MockNativeQueryVerifier internal mockVerifier;
 
     address internal lender = makeAddr("lender");
     address internal strictLender = makeAddr("strictLender");
@@ -25,25 +34,37 @@ contract ProofGateScenesTest is Test {
     uint64 internal constant SEPOLIA_CHAIN_KEY = 1;
     uint256 internal constant REPAYMENT_AMOUNT = 50 ether;
 
+    bytes32 internal constant CREDIT_RELEASED_SIG =
+        keccak256("CreditReleased(uint256,address,uint256,uint256,bytes32,uint256)");
+
     function setUp() public {
-        // TODO(Day 2): deploy PolicyRegistry, credit token and ProofGate, then wire.
-        revert("ProofGate system not implemented yet");
+        registry = new PolicyRegistry();
+        creditToken = new CreditToken();
+        mockVerifier = new MockNativeQueryVerifier();
+        gate = new ProofGate(address(registry), address(creditToken), address(mockVerifier));
+        creditToken.setGate(address(gate));
     }
 
     // ---------------------------------------------------------------------
-    // Scene 2 — Fabrication: a garbage/fabricated proof must never release credit.
+    // Scene 2 — Fabrication: the verifier rejects the proof, no credit moves.
     // ---------------------------------------------------------------------
     function test_Scene2_FabricatedProof_Reverts() public {
+        uint256 policyId = _commitPolicy(lender, 1000 ether, 1);
         IProofGate.Proof[] memory proofs = new IProofGate.Proof[](1);
-        proofs[0] = _fakeProof(1000, REPAYMENT_AMOUNT);
+        proofs[0] = _proof(1000, REPAYMENT_AMOUNT);
 
-        vm.expectRevert();
+        // The Attestcoin precompile (here: the mock) refuses the fabricated proof.
+        mockVerifier.setVerificationResult(false);
+
+        vm.expectRevert(bytes("Proof verification failed"));
         gate.requestCredit(
-            1,
+            policyId,
             borrower,
             proofs,
             IProofGate.AgentDecision({approved: true, claimedAmount: REPAYMENT_AMOUNT, rationale: "trust me"})
         );
+
+        assertEq(creditToken.balanceOf(borrower), 0);
     }
 
     // ---------------------------------------------------------------------
@@ -52,40 +73,40 @@ contract ProofGateScenesTest is Test {
     // ---------------------------------------------------------------------
     function test_Scene3_InflatedClaim_ReleasesDecodedAmountOnly() public {
         uint256 policyId = _commitPolicy(lender, 1000 ether, 1);
-        uint256 expectedReleased = REPAYMENT_AMOUNT; // decoded, proven — not the claim
         uint256 claimed = 500 ether;
 
         IProofGate.Proof[] memory proofs = new IProofGate.Proof[](1);
-        proofs[0] = _fakeProof(1000, REPAYMENT_AMOUNT);
+        proofs[0] = _proof(1000, REPAYMENT_AMOUNT);
 
-        vm.expectEmit(true, true, true, true, address(gate));
-        emit IProofGate.CreditReleased(
-            policyId, borrower, expectedReleased, claimed, keccak256(bytes("inflated rationale")), 1
-        );
+        vm.recordLogs();
         gate.requestCredit(
             policyId,
             borrower,
             proofs,
             IProofGate.AgentDecision({approved: true, claimedAmount: claimed, rationale: "inflated rationale"})
         );
+
+        (uint256 released, uint256 claimedOut,, uint256 proofsUsed) = _lastCreditReleased();
+        assertEq(released, REPAYMENT_AMOUNT, "release must be the decoded amount");
+        assertEq(claimedOut, claimed, "claim is recorded for the audit trail");
+        assertEq(proofsUsed, 1);
+        assertEq(creditToken.balanceOf(borrower), REPAYMENT_AMOUNT);
     }
 
     // ---------------------------------------------------------------------
     // Scene 4a — Policy violation: same proven history under two policies.
-    // Strict policy reverts, lenient succeeds, then an approval beyond the
-    // lender's own committed cap reverts.
+    // Strict reverts, lenient succeeds, then approval beyond the lender's own
+    // committed cap reverts.
     // ---------------------------------------------------------------------
     function test_Scene4a_PolicyViolation_StrictReverts_LenientSucceeds_BeyondCapReverts() public {
-        // History: 3 proven repayments of REPAYMENT_AMOUNT each.
         IProofGate.Proof[] memory proofs = new IProofGate.Proof[](3);
         for (uint256 i = 0; i < 3; i++) {
-            proofs[i] = _fakeProof(uint64(1000 + i), REPAYMENT_AMOUNT);
+            proofs[i] = _proof(uint64(1000 + i), REPAYMENT_AMOUNT);
         }
 
         // Strict lender demands 5 proven repayments; history has 3.
         uint256 strictPolicyId = _commitPolicy(strictLender, 1000 ether, 5);
-        vm.prank(borrower);
-        vm.expectRevert();
+        vm.expectRevert(bytes("Not enough proven repayments"));
         gate.requestCredit(
             strictPolicyId,
             borrower,
@@ -95,25 +116,20 @@ contract ProofGateScenesTest is Test {
 
         // Lenient lender demands 3; the same history satisfies it.
         uint256 lenientPolicyId = _commitPolicy(lender, 1000 ether, 3);
-        vm.expectEmit(true, true, true, true, address(gate));
-        emit IProofGate.CreditReleased(
-            lenientPolicyId,
-            borrower,
-            3 * REPAYMENT_AMOUNT,
-            3 * REPAYMENT_AMOUNT,
-            keccak256(bytes("lenient ok")),
-            3
-        );
+        vm.recordLogs();
         gate.requestCredit(
             lenientPolicyId,
             borrower,
             proofs,
             IProofGate.AgentDecision({approved: true, claimedAmount: 3 * REPAYMENT_AMOUNT, rationale: "lenient ok"})
         );
+        (uint256 released,,, uint256 proofsUsed) = _lastCreditReleased();
+        assertEq(released, 3 * REPAYMENT_AMOUNT);
+        assertEq(proofsUsed, 3);
 
-        // The agent then approves beyond its own committed cap.
+        // The agent then approves beyond its own committed cap (100 < claim 150).
         uint256 cappedPolicyId = _commitPolicy(lender, 2 * REPAYMENT_AMOUNT, 3);
-        vm.expectRevert();
+        vm.expectRevert(bytes("Agent claim exceeds policy cap"));
         gate.requestCredit(
             cappedPolicyId,
             borrower,
@@ -123,9 +139,9 @@ contract ProofGateScenesTest is Test {
     }
 
     // ---------------------------------------------------------------------
-    // Scene 1 — Honest: 3 real repayments proven, policy satisfied
-    // (minCompletedRepayments = 3), credit released for the decoded total.
-    // Multi-proof aggregation is the DEFAULT path.
+    // Scene 1 — Honest: 3 proven repayments, minCompletedRepayments = 3,
+    // credit released for the decoded total. Multi-proof aggregation is the
+    // DEFAULT path.
     // ---------------------------------------------------------------------
     function test_Scene1_HonestThreeRepayments_ReleasesDecodedTotal() public {
         uint256 policyId = _commitPolicy(lender, 1000 ether, 3);
@@ -133,13 +149,10 @@ contract ProofGateScenesTest is Test {
 
         IProofGate.Proof[] memory proofs = new IProofGate.Proof[](3);
         for (uint256 i = 0; i < 3; i++) {
-            proofs[i] = _fakeProof(uint64(1000 + i), REPAYMENT_AMOUNT);
+            proofs[i] = _proof(uint64(1000 + i), REPAYMENT_AMOUNT);
         }
 
-        vm.expectEmit(true, true, true, true, address(gate));
-        emit IProofGate.CreditReleased(
-            policyId, borrower, expectedReleased, expectedReleased, keccak256(bytes("honest rationale")), 3
-        );
+        vm.recordLogs();
         gate.requestCredit(
             policyId,
             borrower,
@@ -147,30 +160,62 @@ contract ProofGateScenesTest is Test {
             IProofGate.AgentDecision({approved: true, claimedAmount: expectedReleased, rationale: "honest rationale"})
         );
 
-        // The credit token actually moved.
-        assertEq(_creditTokenBalance(borrower), expectedReleased);
+        (uint256 released, uint256 claimedOut, bytes32 rationaleHash, uint256 proofsUsed) = _lastCreditReleased();
+        assertEq(released, expectedReleased);
+        assertEq(claimedOut, expectedReleased);
+        assertEq(rationaleHash, keccak256(bytes("honest rationale")), "decision receipt mismatch");
+        assertEq(proofsUsed, 3);
+        assertEq(creditToken.balanceOf(borrower), expectedReleased, "credit token did not move");
     }
 
     // ---------------------------------------------------------------------
     // Helpers
     // ---------------------------------------------------------------------
 
-    /// @dev Placeholder proof; replaced by Attestcoin Protocol fixtures in Day 3.
-    function _fakeProof(uint64 blockHeight, uint256 amount) internal pure returns (IProofGate.Proof memory) {
+    /// @dev A proof carrying a synthetic but well-formed EVM type-0 transaction:
+    ///      abi.encode(uint8 txType, bytes[] chunks), receipt in the last chunk,
+    ///      one Transfer(payer -> vault, amount) log on the source token.
+    function _proof(uint64 blockHeight, uint256 amount) internal view returns (IProofGate.Proof memory) {
         INativeQueryVerifier.MerkleProofEntry[] memory siblings =
             new INativeQueryVerifier.MerkleProofEntry[](1);
-        siblings[0] = INativeQueryVerifier.MerkleProofEntry({hash: bytes32(uint256(amount)), isLeft: true});
+        siblings[0] = INativeQueryVerifier.MerkleProofEntry({hash: bytes32(amount), isLeft: true});
         bytes32[] memory continuityRoots = new bytes32[](1);
         continuityRoots[0] = bytes32(uint256(blockHeight));
         return IProofGate.Proof({
             chainKey: SEPOLIA_CHAIN_KEY,
             blockHeight: blockHeight,
-            encodedTransaction: abi.encode(amount),
+            encodedTransaction: _transferTx(sourceToken, borrower, vault, amount),
             merkleRoot: bytes32(uint256(blockHeight)),
             siblings: siblings,
             lowerEndpointDigest: bytes32(uint256(blockHeight)),
             continuityRoots: continuityRoots
         });
+    }
+
+    /// @dev Builds a synthetic EvmV1Decoder-decodable payload whose receipt holds
+    ///      exactly one ERC-20 Transfer log (status = 1).
+    function _transferTx(address token, address payer, address to, uint256 amount)
+        internal
+        pure
+        returns (bytes memory)
+    {
+        bytes32[] memory topics = new bytes32[](3);
+        topics[0] = keccak256("Transfer(address,address,uint256)");
+        topics[1] = bytes32(uint256(uint160(payer)));
+        topics[2] = bytes32(uint256(uint160(to)));
+
+        EvmV1Decoder.LogEntryTuple[] memory logs = new EvmV1Decoder.LogEntryTuple[](1);
+        logs[0] = EvmV1Decoder.LogEntryTuple({address_: token, topics: topics, data: abi.encode(amount)});
+
+        bytes[] memory chunks = new bytes[](3);
+        // chunk[0]: common tx fields (nonce, gasLimit, from, toIsNull, to, value, data)
+        chunks[0] = abi.encode(uint64(0), uint64(50000), payer, false, token, uint256(0), bytes(""));
+        // chunk[1]: type-0 specific (gasPrice, v, r, s)
+        chunks[1] = abi.encode(uint128(1 gwei), uint256(27), bytes32(uint256(1)), bytes32(uint256(2)));
+        // chunk[2]: receipt (status, gasUsed, logs, logsBloom)
+        chunks[2] = abi.encode(uint8(1), uint64(45000), logs, bytes(""));
+
+        return abi.encode(uint8(0), chunks);
     }
 
     function _commitPolicy(address policyLender, uint256 maxLoan, uint256 minRepayments)
@@ -191,9 +236,19 @@ contract ProofGateScenesTest is Test {
         );
     }
 
-    function _creditTokenBalance(address account) internal view returns (uint256) {
-        (bool ok, bytes memory data) = gate.creditToken().staticcall(abi.encodeWithSignature("balanceOf(address)", account));
-        require(ok, "balanceOf failed");
-        return abi.decode(data, (uint256));
+    /// @dev Scans recorded logs for CreditReleased and decodes the data payload.
+    ///      (CreditToken's Transfer event fires first, so naive expectEmit on the
+    ///      gate event would assert against the wrong log.)
+    function _lastCreditReleased()
+        internal
+        returns (uint256 released, uint256 claimed, bytes32 rationaleHash, uint256 proofsUsed)
+    {
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        for (uint256 i = logs.length; i > 0; --i) {
+            if (logs[i - 1].topics[0] == CREDIT_RELEASED_SIG) {
+                return abi.decode(logs[i - 1].data, (uint256, uint256, bytes32, uint256));
+            }
+        }
+        revert("CreditReleased not emitted");
     }
 }

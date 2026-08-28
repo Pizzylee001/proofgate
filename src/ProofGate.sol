@@ -17,9 +17,10 @@ import {EvmV1Decoder} from "@gluwa/usc-contracts/common/EvmV1Decoder.sol";
 ///      no privileged role — anyone may submit, and the released amount is the
 ///      decoded, proven total, never the agent's claimed amount.
 contract ProofGate is IProofGate {
-    /// @dev ERC-20 Transfer event signature hash on the source chain.
+    /// @dev keccak256("Transfer(address,address,uint256)") — verified with cast and ethers.
+    ///      (An earlier draft carried the common misquote ending ...c68c70b9.)
     bytes32 public constant TRANSFER_EVENT_SIGNATURE =
-        0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11696f66497c68c70b9;
+        0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef;
 
     IPolicyRegistry internal immutable _policyRegistry;
     CreditToken internal immutable _creditToken;
