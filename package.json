@@ -1,7 +1,7 @@
 {
   "name": "proofgate",
   "version": "1.0.0",
-  "description": "ProofGate \u2014 AI-compiled lending policies enforced on-chain against Attestcoin Protocol cross-chain proofs (BUIDL CTC 2026 Fall, AI track)",
+  "description": "ProofGate — AI-compiled lending policies enforced on-chain against Attestcoin Protocol cross-chain proofs (BUIDL CTC 2026 Fall, AI track)",
   "directories": {
     "lib": "lib",
     "test": "test"
@@ -28,5 +28,8 @@
     "@gluwa/usc-contracts": "^0.2.0",
     "@gluwa/usc-sdk": "^0.18.0",
     "openai": "^7.8.0"
+  },
+  "devDependencies": {
+    "@marp-team/marp-cli": "^4.5.0"
   }
 }
