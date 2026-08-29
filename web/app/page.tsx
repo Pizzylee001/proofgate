@@ -25,7 +25,13 @@ export default function Home() {
   return (
     <main className="mx-auto max-w-3xl px-5 pb-24">
       <header className="flex items-center justify-between py-6">
-        <div className="text-lg font-bold tracking-tight">ProofGate</div>
+        <div className="flex items-center gap-2.5">
+          <svg viewBox="0 0 64 64" width="30" height="30" aria-hidden="true">
+            <path d="M19 53 V29 A13 12 0 0 1 45 29 V53" fill="none" stroke="#EDF2F7" strokeWidth="4.5" strokeLinecap="round" />
+            <path d="M25 34.5 L30 39.5 L39.5 28.5" fill="none" stroke="#2EE6A8" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <div className="text-lg font-bold tracking-tight">ProofGate</div>
+        </div>
         <a
           href="https://github.com/Pizzylee001/proofgate"
           target="_blank"
