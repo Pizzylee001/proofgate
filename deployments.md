@@ -138,6 +138,24 @@ All three: Transfer(borrower `0x7Fe2...5d27B` -> vault `0xd1F1...81A38`) on PGUS
   (status 1), rationaleHash `0xadd445eccd461a035f8daa50a5265b3f9c10fc0f25419d245f484b2059156c10`.
 - Borrower PGC balance: 200 -> 250. Total runtime ~113s.
 
+## Day 8 — Live demo dashboard (web/), all routes verified on-chain
+
+Demo wallet (dashboard's only key, fresh/testnet-only): `0xd6a91ab4D247743687D95C96900B63aD9394c26f`
+
+- `/api/commit`: policy #8 committed BY THE DEMO WALLET (lender = 0xd6a9...):
+  tx `0x6d7a5d50a0102afc9a972300fbbed7051195547306650c60f9af833f371dca2b`
+- `/api/decide` (SSE: proving -> thinking -> executing): 3 proofs under policy #8
+  (`0x3ee90033...`, `0x7dd85edb...`, `0xc0baf352...`), then requestCredit
+  `0x246108db61f3d35eab57eeb33a8d21c469858c5293d6bd18e69833fbb1674a10`
+  -> released 50 PGC, balance 250 -> 300.
+- `/api/cheat` fabricate: tampered proof REVERTED by the precompile —
+  tx `0xb176eb5bbd08c523dcd323b024f80bba83759fedf65c584e7e33d1cd041c049f` (status 0,
+  "Merkle proof validation failed").
+- `/api/cheat` inflate: fresh cap-50 policy #9 committed, real 20 PGUSD proof
+  verified (`0xcf086bfc...`), claim 500 REVERTED —
+  tx `0x793f8dec089dbb31cde440368394034fdb3da64552043a44aab703050b7890d0` (status 0,
+  "Agent claim exceeds policy cap").
+
 ## `.env` additions (never commit `.env`)
 
 ```

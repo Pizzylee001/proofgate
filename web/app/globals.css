@@ -1,26 +1,41 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* The Protocol Room — semantic palette.
+   Green (#2EE6A8) = proven/true ONLY. Red (#FF4D6D) = the protocol caught something ONLY. */
+@theme {
+  --color-room-bg: #0A1128;
+  --color-room-panel: #14213D;
+  --color-room-border: #1F2B4D;
+  --color-room-green: #2EE6A8;
+  --color-room-red: #FF4D6D;
+  --color-room-text: #EDF2F7;
+  --color-room-mono: #8DA2C4;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-room-bg);
+  color: var(--color-room-text);
+}
+
+.room-mono {
+  font-family: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--color-room-mono);
+}
+
+/* Minimal motion: results fade/slide in only. */
+@keyframes room-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.room-in { animation: room-in 320ms ease-out both; }
+
+/* The alarm: a caught-cheat panel that feels like an alarm in a dark room. */
+@keyframes alarm-glow {
+  0%, 100% { box-shadow: 0 0 24px rgba(255, 77, 109, 0.35); }
+  50% { box-shadow: 0 0 48px rgba(255, 77, 109, 0.6); }
+}
+.room-alarm {
+  border: 1px solid var(--color-room-red);
+  background: rgba(255, 77, 109, 0.08);
+  animation: room-in 320ms ease-out both, alarm-glow 2.4s ease-in-out infinite;
 }
