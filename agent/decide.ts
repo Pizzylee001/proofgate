@@ -1,8 +1,8 @@
 /**
- * ProofGate — agent/decide.ts
+ * ProofGate: agent/decide.ts
  *
  * The decision loop: load the committed policy, present the cryptographically
- * proven repayment history to the LLM, and let the LLM decide — then execute
+ * proven repayment history to the LLM, and let the LLM decide, then execute
  * its decision on-chain. The rationale is hashed into CreditReleased: the
  * permanent receipt of what the AI claimed vs what the proofs supported.
  *
@@ -99,7 +99,7 @@ async function main(): Promise<void> {
   //    of recorded ones, so starting at index `onRecord` is exactly right.
   const onRecord = Number(await gate.provenRepaymentCount(policyId, borrower));
   if (onRecord < fixtures.length) {
-    console.log(`\n${onRecord} proof(s) already on record — submitting the remaining ${fixtures.length - onRecord}...`);
+    console.log(`\n${onRecord} proof(s) already on record; submitting the remaining ${fixtures.length - onRecord}...`);
     for (let i = onRecord; i < fixtures.length; i++) {
       const tx = await gate.submitRepaymentProof(policyId, borrower, fixtureToTuple(fixtures[i]));
       const rcpt = await tx.wait();
@@ -109,7 +109,7 @@ async function main(): Promise<void> {
   const count = await gate.provenRepaymentCount(policyId, borrower);
   console.log(`proven repayments on record for policy ${policyId}: ${count}`);
 
-  // 4. The LLM decides — WITHIN the committed policy.
+  // 4. The LLM decides, WITHIN the committed policy.
   console.log('\nasking the LLM to decide...');
   const decision = await decide(policyJson, provenRepayments, { borrower, requestedAmount: requested });
   console.log('LLM decision:');

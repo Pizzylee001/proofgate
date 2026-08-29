@@ -59,7 +59,7 @@ export function PolicySection({ onCommitted }: { onCommitted: (policyId: string)
       <SectionHeader
         index="01"
         title="The Policy"
-        blurb="The lender writes rules in plain English. The AI compiles them into a machine-readable policy — committed on-chain before any borrower applies, immutable forever after."
+        blurb="The lender writes rules in plain English. The AI compiles them into a machine-readable policy, committed on-chain before any borrower applies, immutable forever after."
       />
       <Card>
         <textarea
@@ -90,12 +90,12 @@ export function PolicySection({ onCommitted }: { onCommitted: (policyId: string)
               <Row k="vaultAddress" v={compiled.vaultAddress} mono />
             </div>
             <p className="mt-3 border-t border-room-border pt-3 text-sm leading-relaxed text-room-text/90">
-              <span className="text-room-green">AI rationale — </span>{compiled.rationale}
+              <span className="text-room-green">AI rationale: </span>{compiled.rationale}
             </p>
             {commit && (
               <p className="mt-3 border-t border-room-border pt-3 text-sm">
                 Committed as <span className="text-room-green font-semibold">policy #{commit.policyId}</span>
-                {' — '}<TxLink hash={commit.txHash} />
+                {', tx: '}<TxLink hash={commit.txHash} />
               </p>
             )}
           </Card>

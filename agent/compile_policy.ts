@@ -1,5 +1,5 @@
 /**
- * ProofGate — agent/compile_policy.ts
+ * ProofGate: agent/compile_policy.ts
  *
  * The AI-track headline flow: a lender speaks English; the agent compiles it
  * into the machine-readable Policy struct and commits it on-chain BEFORE any
@@ -59,7 +59,7 @@ async function main(): Promise<void> {
   const nextId = Number(await registry.policyCount()) + 1;
   const filePath = path.join(__dirname, '..', 'policies', `${nextId}.md`);
   const fileBody =
-    `# ProofGate Policy #${nextId} — AI-compiled\n\n` +
+    `# ProofGate Policy #${nextId}: AI-compiled\n\n` +
     `## English original (lender's words)\n\n${english}\n\n` +
     `## Compiled policy (LLM, temperature 0, validated)\n\n` +
     '```json\n' + JSON.stringify(compiled, null, 2) + '\n```\n\n' +
@@ -67,12 +67,12 @@ async function main(): Promise<void> {
   fs.writeFileSync(filePath, fileBody);
   console.log(`\nwrote ${filePath}`);
 
-  // 3. keccak the ENGLISH text (not the file) — the hash binds the contract
+  // 3. keccak the ENGLISH text (not the file); the hash binds the contract
   //    to the lender's words.
   const policyTextHash = ethers.keccak256(ethers.toUtf8Bytes(english));
   console.log(`policyTextHash (keccak256 of English text): ${policyTextHash}`);
 
-  // 4. Commit on-chain. The agent pays gas like any caller — no privilege.
+  // 4. Commit on-chain. The agent pays gas like any caller; no privilege.
   const agent = new ethers.Wallet(must('CREDITCOIN_WALLET_PRIVATE_KEY'), provider);
   const registryW = new ethers.Contract(REGISTRY_ADDRESS, REGISTRY_ABI, agent);
   const policy = {

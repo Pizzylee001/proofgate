@@ -1,5 +1,5 @@
 /**
- * ProofGate — Day 3 end-to-end: real Attestcoin proofs for the three Sepolia
+ * ProofGate: Day 3 end-to-end, real Attestcoin proofs for the three Sepolia
  * repayments, submitted to ProofGate on Creditcoin CC3 testnet.
  *
  * Flow per repayment tx:
@@ -8,7 +8,7 @@
  *   3. generate the proof via the Proof Builder service (@gluwa/usc-sdk)
  *   4. IMMEDIATELY append the full proof payload to test/fixtures/proofs.json
  *   5. submitRepaymentProof(policyId, borrower, proof) on ProofGate
- * Then requestCredit with the agent decision — signed by the AGENT key,
+ * Then requestCredit with the agent decision, signed by the AGENT key,
  * which is NOT the borrower. Distinct identities are the demo.
  *
  * Usage:  node scripts/prove_and_submit.ts

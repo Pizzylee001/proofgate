@@ -6,7 +6,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains" });
 
 export const metadata: Metadata = {
-  title: "ProofGate — The Protocol Room",
+  title: "ProofGate: The Protocol Room",
   description:
     "AI-compiled lending policies enforced on-chain against Attestcoin Protocol cross-chain proofs. The AI interprets the policy; the contract enforces it.",
 };

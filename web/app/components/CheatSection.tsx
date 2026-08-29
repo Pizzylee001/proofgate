@@ -41,7 +41,7 @@ export function CheatSection() {
       <SectionHeader
         index="04"
         title="Try to Cheat"
-        blurb="Go ahead. Forge a repayment, or inflate the claim. Every attempt is broadcast on-chain — and every failure below is the protocol's own revert, mined forever as evidence."
+        blurb="Go ahead. Forge a repayment, or inflate the claim. Every attempt is broadcast on-chain, and every failure below is the protocol's own revert, mined forever as evidence."
       />
       <div className="flex flex-wrap gap-3">
         <Button tone="danger" onClick={() => cheat('fabricate')} disabled={busy !== null}>

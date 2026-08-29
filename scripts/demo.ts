@@ -1,8 +1,8 @@
 /**
- * ProofGate — `yarn demo` / `npm run demo`
+ * ProofGate: `yarn demo` / `npm run demo`
  *
  * One narrated run through all five scenes:
- *   Scenes 1-4: already executed on CC3 testnet (see deployments.md) — the demo
+ *   Scenes 1-4: already executed on CC3 testnet (see deployments.md); the demo
  *     replays the narrative and prints the REAL tx hashes as evidence. The same
  *     scenes are also executable offline: `forge test` runs them against the
  *     saved Attestcoin proof fixtures.
@@ -38,7 +38,7 @@ async function main(): Promise<void> {
   const credit = new ethers.Contract(CREDIT_TOKEN_ADDRESS, ERC20_ABI, provider);
   const bal0 = await credit.balanceOf(BORROWER);
 
-  banner('PROOFGATE — AI-compiled lending policies, enforced by Attestcoin proofs');
+  banner('PROOFGATE: AI-compiled lending policies, enforced by Attestcoin proofs');
   console.log('A lender writes rules in plain English. The AI compiles them into a');
   console.log('machine-readable policy committed on-chain BEFORE anyone applies.');
   console.log('After that, credit moves only when the Attestcoin Protocol has');
@@ -47,16 +47,16 @@ async function main(): Promise<void> {
   console.log(`PGC balance before demo: ${ethers.formatEther(bal0)}`);
   await pause();
 
-  banner('SCENE 1 — Honest borrower (LIVE on testnet, Day 3)');
+  banner('SCENE 1: Honest borrower (LIVE on testnet, Day 3)');
   console.log('Three real Sepolia repayments (20 + 15 + 15 PGUSD) were proven via the');
-  console.log('Attestcoin precompile and 50 PGC was released — the decoded total.');
+  console.log('Attestcoin precompile and 50 PGC was released: the decoded total.');
   console.log('Evidence:');
   console.log('  proofs verified:  0xd0e48c0a...adf83e9 / 0x2e8fbd3e...883da7e / 0x708b7cfc...be3ac81');
   console.log('  requestCredit:    0x0fe91edf0f72a41bb24fb2aa4eb427d3377f6258fa104639f078a1eefe7b33e1');
   console.log('  Offline replay:   forge test --match-test test_Scene1');
   await pause();
 
-  banner('SCENE 2 — Fabrication attempt (LIVE on testnet, Day 4)');
+  banner('SCENE 2: Fabrication attempt (LIVE on testnet, Day 4)');
   console.log('We tampered one byte inside a proof (repayment 20 -> 21 PGUSD).');
   console.log('The Attestcoin precompile itself rejected it: "Merkle proof validation failed".');
   console.log('No proof, no credit.');
@@ -65,25 +65,25 @@ async function main(): Promise<void> {
   console.log('  Offline replay: forge test --match-test test_Scene2');
   await pause();
 
-  banner('SCENE 3 — Inflated AI claim (LIVE on testnet, Day 4)');
+  banner('SCENE 3: Inflated AI claim (LIVE on testnet, Day 4)');
   console.log('Under Policy #2 (cap 500), the agent claimed 500 PGUSD against a proven');
-  console.log('history of 50. The contract released the decoded 50 — never the claim.');
+  console.log('history of 50. The contract released the decoded 50, never the claim.');
   console.log('Evidence:');
   console.log('  policy commit:    0x281a60b201e2ea683bd66b95b42809c5b56c9bf32cf2480041deb484823be0cb');
   console.log('  requestCredit:    0x8c6096578855da22b762f26ec9da49aa08b169f794ea259894f2aed57d90f3fb');
-  console.log('  CreditReleased:   released=50, claimed=500 — the decision receipt.');
+  console.log('  CreditReleased:   released=50, claimed=500: the decision receipt.');
   await pause();
 
-  banner('SCENE 4 — Policy violation (LIVE on testnet, Day 4)');
+  banner('SCENE 4: Policy violation (LIVE on testnet, Day 4)');
   console.log('Same proven history, two policies:');
-  console.log('  Policy #3 "Conservative" (needs 5 repayments): REVERTED —');
+  console.log('  Policy #3 "Conservative" (needs 5 repayments): REVERTED.');
   console.log('    0xc89c97c2f8e138fce22604392bff00f1ec501b681239cf83cd7354cfd8e81612 (status 0)');
-  console.log('  Policy #4 (cap 500), agent claimed 600: REVERTED —');
+  console.log('  Policy #4 (cap 500), agent claimed 600: REVERTED.');
   console.log('    0xd2b53bf5a44030e567b4df780767470a8db6e0d8c5050847d3be81ce0e8ede21 (status 0)');
   console.log('The AI interprets policy; the contract enforces it.');
   await pause();
 
-  banner('SCENE 5 — LIVE: lender speaks English, the AI compiles and decides');
+  banner('SCENE 5: LIVE, lender speaks English, the AI compiles and decides');
   console.log('A brand-new policy is compiled by the LLM right now, committed on-chain,');
   console.log('then the LLM evaluates the Attestcoin-proven history and decides.\n');
   await pause(1);

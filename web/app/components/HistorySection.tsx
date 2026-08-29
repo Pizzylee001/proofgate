@@ -15,7 +15,7 @@ export function HistorySection({ history }: { history: ProvenRepayment[] }) {
       <SectionHeader
         index="02"
         title="The Proven History"
-        blurb="Three repayments on Ethereum Sepolia — not claimed, cryptographically proven. Each was verified by the Attestcoin Protocol's Native Query Verifier precompile, synchronously, on Creditcoin."
+        blurb="Three repayments on Ethereum Sepolia: not claimed, cryptographically proven. Each was verified by the Attestcoin Protocol's Native Query Verifier precompile, synchronously, on Creditcoin."
       />
       <Card>
         <ul className="divide-y divide-room-border">

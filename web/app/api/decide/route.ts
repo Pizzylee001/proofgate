@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
 /**
- * Streaming decision loop (SSE) — the dashboard stepper follows REAL phases:
+ * Streaming decision loop (SSE): the dashboard stepper follows REAL phases:
  *   proving (only if proofs not yet on record) -> thinking (LLM) -> executing -> done
  * Events: {"phase": "..."} lines; final phase is done|declined|error.
  */

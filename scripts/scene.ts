@@ -1,5 +1,5 @@
 /**
- * ProofGate — Day 4 scene runner. Parameterized; no scene logic hardcoded.
+ * ProofGate: Day 4 scene runner. Parameterized; no scene logic hardcoded.
  *
  * Usage (env: CREDITCOIN_RPC_URL, SOURCE_CHAIN_RPC_URL, CREDITCOIN_WALLET_PRIVATE_KEY):
  *   node scripts/scene.ts commit-policy <file.md> <maxLoanPgusd> <minRepayments>
@@ -7,7 +7,7 @@
  *   node scripts/scene.ts request <policyId> <claimPgusd> [rationale...]
  *
  * `prove` resubmits the saved fixtures (test/fixtures/proofs.json) under the
- * given policyId — the per-policy replay guard makes this legitimate for a
+ * given policyId; the per-policy replay guard makes this legitimate for a
  * new policy. With --tamper, one fixture's repayment amount inside txBytes is
  * rewritten before submission: the Attestcoin precompile must then reject it.
  *
@@ -85,7 +85,7 @@ async function sendExpectingMaybeRevert(label: string, fn: () => Promise<any>, c
       throw e;
     }
   }
-  console.log(`  ${label} tx: ${rcpt.hash} status=${rcpt.status} ${rcpt.status === 0 ? '(REVERTED ON-CHAIN — demo evidence)' : ''}`);
+  console.log(`  ${label} tx: ${rcpt.hash} status=${rcpt.status} ${rcpt.status === 0 ? '(REVERTED ON-CHAIN: demo evidence)' : ''}`);
   if (rcpt.status === 0) {
     process.exitCode = 2; // signal expected-revert to the caller without hiding the hash
   }
@@ -140,7 +140,7 @@ async function main(): Promise<void> {
         () => gate.submitRepaymentProof(policyId, BORROWER, tuple, { gasLimit: GAS_LIMIT }),
         () => gate.submitRepaymentProof.staticCall(policyId, BORROWER, tuple),
       );
-      if (tamper) break; // stop after the tampered one — it must not succeed
+      if (tamper) break; // stop after the tampered one; it must not succeed
     }
     const count = await gate.provenRepaymentCount(policyId, BORROWER);
     console.log(`  proven repayments on record for policy ${policyId}: ${count}`);
@@ -163,7 +163,7 @@ async function main(): Promise<void> {
     } catch (e: any) {
       if (e && e.receipt) { rcpt = e.receipt; } else { throw e; }
     }
-    console.log(`  requestCredit tx: ${rcpt.hash} status=${rcpt.status} ${rcpt.status === 0 ? '(REVERTED ON-CHAIN — demo evidence)' : ''}`);
+    console.log(`  requestCredit tx: ${rcpt.hash} status=${rcpt.status} ${rcpt.status === 0 ? '(REVERTED ON-CHAIN: demo evidence)' : ''}`);
     for (const log of rcpt.logs) {
       try {
         const parsed = iface.parseLog(log);

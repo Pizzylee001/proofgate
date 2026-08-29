@@ -83,7 +83,7 @@ export function DecisionSection({ policyId, onBalance }: { policyId: string; onB
       <SectionHeader
         index="03"
         title="The Decision"
-        blurb="The agent reads the committed policy and the proven history, decides within the policy, and executes. The contract releases the decoded, proven total — never the claim."
+        blurb="The agent reads the committed policy and the proven history, decides within the policy, and executes. The contract releases the decoded, proven total, never the claim."
       />
       <Card>
         <div className="flex flex-wrap items-end gap-3 text-sm">

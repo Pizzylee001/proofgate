@@ -1,5 +1,5 @@
 /**
- * ProofGate — provider-agnostic LLM module.
+ * ProofGate: provider-agnostic LLM module.
  *
  * One OpenAI-compatible client configured entirely from env:
  *   LLM_BASE_URL, LLM_API_KEY, LLM_MODEL
@@ -7,8 +7,8 @@
  * touches only env vars, never code.
  *
  * The LLM's two jobs here are the ones a contract CANNOT do:
- *   compilePolicy — interpret plain-English lending rules into the Policy struct
- *   decide        — weigh proven repayment facts against a committed policy
+ *   compilePolicy: interpret plain-English lending rules into the Policy struct
+ *   decide:        weigh proven repayment facts against a committed policy
  *
  * Hard rules: temperature 0, strict JSON outputs, validate everything,
  * abort loudly on any LLM error. NEVER fabricate a decision.
@@ -28,7 +28,7 @@ interface PolicyJSON {
 interface AgentDecisionJSON {
   approved: boolean;
   amount: string;    // whole PGUSD, decimal string, the LLM's claim
-  rationale: string; // free text — hashed on-chain into CreditReleased
+  rationale: string; // free text, hashed on-chain into CreditReleased
 }
 
 function client(): any {
@@ -102,10 +102,10 @@ async function compilePolicy(
 ): Promise<PolicyJSON> {
   const system = `You are the ProofGate policy compiler. A lender states lending rules in plain English.
 You compile them into STRICT JSON with EXACTLY these fields:
-  maxLoanAmount (string, decimal, whole PGUSD — the hard cap per release),
-  minCompletedRepayments (integer >= 1 — how many proven past repayments a borrower needs),
+  maxLoanAmount (string, decimal, whole PGUSD, the hard cap per release),
+  minCompletedRepayments (integer >= 1, how many proven past repayments a borrower needs),
   requiredSourceChainId (integer, ALWAYS 11155111 for Ethereum Sepolia),
-  requiredSourceChainKey (integer, ALWAYS 1 — Sepolia's chainKey on Creditcoin CC3 testnet),
+  requiredSourceChainKey (integer, ALWAYS 1: Sepolia's chainKey on Creditcoin CC3 testnet),
   requiredSourceToken (string, ALWAYS the PGUSD token address given in the context),
   vaultAddress (string, ALWAYS the vault address given in the context),
   rationale (one paragraph explaining how each English phrase maps to each field).
@@ -129,12 +129,12 @@ async function decide(
 Decide WITHIN the policy. Rules:
 - The policy is the ceiling: amount must never exceed maxLoanAmount.
 - If proven repayments are fewer than minCompletedRepayments, you must reject
-  (approved=false) — approving would revert on-chain anyway.
+  (approved=false); approving would revert on-chain anyway.
 - The honest amount is the sum of proven repayments, capped at maxLoanAmount.
   You may approve less; never more.
 - Output STRICT JSON: {"approved": boolean, "amount": string (whole PGUSD),
   "rationale": string}. No markdown. The rationale is hashed on-chain as the
-  permanent decision receipt — write it as if an auditor will read it.`;
+  permanent decision receipt, so write it as if an auditor will read it.`;
   const user = `Committed policy:\n${JSON.stringify(policyJson, null, 2)}\n\n` +
     `Cryptographically proven repayments (Attestcoin-verified):\n${JSON.stringify(provenRepayments, null, 2)}\n\n` +
     `Borrower request:\n${JSON.stringify(borrowerAsk, null, 2)}`;
