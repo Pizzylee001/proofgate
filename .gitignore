@@ -7,3 +7,6 @@ node_modules/
 lib/
 .venv-deck/
 chrome-install.log
+
+# allow placeholder example (no secrets)
+!web/.env.example

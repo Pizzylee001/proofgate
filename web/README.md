@@ -1,36 +1,34 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ProofGate — The Protocol Room (web dashboard)
 
-## Getting Started
+One-page live demo: compile a lending policy from English with an LLM, commit it
+on-chain, watch Attestcoin-verified repayment history drive an AI decision, then
+try to cheat and watch the protocol catch it — all txs real on CC3 testnet.
 
-First, run the development server:
+## Run locally
 
 ```bash
+# from the REPO ROOT: the routes need the repo's .env (see .env.example)
+cd web
+set -a && source ../.env && set +a   # or export the vars yourself
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Deploy to Vercel (user steps)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Push this repo to GitHub (already done).
+2. vercel.com → sign in with GitHub → **Add New → Project** → import `proofgate`.
+3. **Root Directory: `web`** (edit before deploying — important!).
+4. Add the environment variables from `.env.example`
+   (LLM_BASE_URL, LLM_API_KEY, LLM_MODEL, CREDITCOIN_RPC_URL, DEMO_WALLET_PRIVATE_KEY).
+5. Deploy. No build settings needed beyond the defaults; the framework preset
+   is Next.js and the build command is auto-detected.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Notes:
+- Contract addresses and the Attestcoin proof fixtures are bundled
+  (`lib/chain.ts`, `lib/proofs.json`) — no extra config.
+- The demo wallet needs a small tCTC balance from the CC3 testnet faucet,
+  or commit/decide/cheat routes will fail with insufficient funds.
+- Every tx hash on the page links to the CC3 testnet explorer
+  (creditcoin-testnet.blockscout.com).
