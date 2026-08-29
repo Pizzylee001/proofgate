@@ -15,7 +15,7 @@ repayment history.
 
 **The AI interprets the policy. The contract enforces it.**
 
-BUIDL CTC 2026 Fall — AI track
+BUIDL CTC 2026 Fall · AI track
 
 ---
 
@@ -23,22 +23,22 @@ BUIDL CTC 2026 Fall — AI track
 
 - LLMs can **fabricate** repayment histories, **inflate** amounts,
   and "reinterpret" rules into what the lender never agreed to.
-- Contracts can't judge free-text rules — that judgment is the one job
+- Contracts can't judge free-text rules; that judgment is the one job
   only the AI can do. So keep the AI, but **bind it**:
   1. to its **own committed policy** (immutable, on-chain, pre-application),
   2. to **cryptographically proven cross-chain facts** (Attestcoin Protocol).
-- Every release pays out the **decoded, proven total — never the AI's claim.**
+- Every release pays out the **decoded, proven total, never the AI's claim.**
 
 ---
 
 ## Architecture
 
-- **PolicyRegistry** — English policy → LLM-compiled struct + `policyTextHash`,
+- **PolicyRegistry**: English policy → LLM-compiled struct + `policyTextHash`,
   committed immutable. Versioning = new policyId.
-- **ProofGate** — `submitRepaymentProof` (verify via precompile → replay guard →
+- **ProofGate**: `submitRepaymentProof` (verify via precompile → replay guard →
   decode Transfer from the proven receipt → policy checks) then `requestCredit`
   (count ≥ min, claim ≤ cap, mint `min(decoded, cap)`).
-- **TypeScript agent** — `llm.ts` (provider-agnostic) → `compile_policy.ts` →
+- **TypeScript agent**: `llm.ts` (provider-agnostic) → `compile_policy.ts` →
   `decide.ts`. Ordinary key, **zero privileged roles**.
 
 Contracts frozen at `v1.0-contracts-frozen`; 4/4 Foundry scenes run offline
@@ -66,13 +66,13 @@ Full audit trail: `deployments.md`
 ```solidity
 event CreditReleased(
   uint256 indexed policyId, address indexed borrower,
-  uint256 releasedAmount,  // decoded from proofs — what moved
+  uint256 releasedAmount,  // decoded from proofs - what moved
   uint256 claimedAmount,   // what the AI said
   bytes32 rationaleHash,   // keccak256 of the LLM's own reasoning
   uint256 proofsUsed);
 ```
 
-Scene 3 on-chain: `released=50, claimed=500` — the AI's inflation attempt is
+Scene 3 on-chain: `released=50, claimed=500`. The AI's inflation attempt is
 **permanently recorded next to the truth**. Any auditor can hash the rationale
 and compare it against the proven facts.
 
@@ -81,13 +81,13 @@ and compare it against the proven facts.
 ## Attestcoin Protocol depth + resilience
 
 - **22 `verifyAndEmit` calls across 7 committed policies** (21 verified,
-  1 rejected — the fabrication scene). Each proof carries a full EVM receipt;
+  1 rejected: the fabrication scene). Each proof carries a full EVM receipt;
   event logs are decoded on-chain via the official `EvmV1Decoder`.
 - Synchronous verification inside the tx, merkle + continuity proofs from the
   Proof Builder, per-policy replay guards, multi-proof aggregation by default.
 - **Resilience, proven live:** an RPC `ETIMEDOUT` hit mid-demo. The agent is
-  resumable — it submits only proofs not yet on record (the replay guard makes
-  the boundary exact) — and completed the scene without manual repair.
+  resumable: it submits only proofs not yet on record (the replay guard makes
+  the boundary exact) and completed the scene without manual repair.
 - Attester stall plan: every proof is saved as a fixture the instant it exists.
 
 ---
