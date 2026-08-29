@@ -118,21 +118,18 @@ contract ProofGate is IProofGate {
     /// @notice Steps 2–5 for a single proof: verify, replay-guard, decode, enforce.
     /// @return amount The decoded, proven repayment amount.
     /// @return queryId The replay-guard id of the proof.
-    function _processProof(
-        IPolicyRegistry.Policy memory policy,
-        uint256 policyId,
-        address borrower,
-        Proof calldata p
-    ) internal returns (uint256 amount, bytes32 queryId) {
+    function _processProof(IPolicyRegistry.Policy memory policy, uint256 policyId, address borrower, Proof calldata p)
+        internal
+        returns (uint256 amount, bytes32 queryId)
+    {
         // 2. Verify the proof against the Attestcoin Protocol precompile.
         INativeQueryVerifier.MerkleProof memory merkleProof =
             INativeQueryVerifier.MerkleProof({root: p.merkleRoot, siblings: p.siblings});
         INativeQueryVerifier.ContinuityProof memory continuityProof =
             INativeQueryVerifier.ContinuityProof({lowerEndpointDigest: p.lowerEndpointDigest, roots: p.continuityRoots});
 
-        bool verified = _verifier.verifyAndEmit(
-            p.chainKey, p.blockHeight, p.encodedTransaction, merkleProof, continuityProof
-        );
+        bool verified =
+            _verifier.verifyAndEmit(p.chainKey, p.blockHeight, p.encodedTransaction, merkleProof, continuityProof);
         require(verified, "Proof verification failed");
 
         // 3. Replay guard, per (policyId, queryId).

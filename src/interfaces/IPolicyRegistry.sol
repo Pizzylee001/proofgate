@@ -5,13 +5,13 @@ pragma solidity ^0.8.20;
 interface IPolicyRegistry {
     /// @notice Structured policy compiled from the lender's English rules by the AI agent.
     struct Policy {
-        uint256 maxLoanAmount;          // hard cap per credit release
+        uint256 maxLoanAmount; // hard cap per credit release
         uint256 minCompletedRepayments; // count of PROVEN repayments required
-        uint64 requiredSourceChainId;   // Sepolia = 11155111
-        uint64 requiredSourceChainKey;  // Sepolia chainKey on CC3 testnet = 1
-        address requiredSourceToken;    // ERC-20 the repayment must be paid in
-        address vaultAddress;           // repayment recipient on the source chain
-        bytes32 policyTextHash;         // keccak256 of the English original
+        uint64 requiredSourceChainId; // Sepolia = 11155111
+        uint64 requiredSourceChainKey; // Sepolia chainKey on CC3 testnet = 1
+        address requiredSourceToken; // ERC-20 the repayment must be paid in
+        address vaultAddress; // repayment recipient on the source chain
+        bytes32 policyTextHash; // keccak256 of the English original
     }
 
     event PolicyCommitted(uint256 indexed policyId, address indexed lender, Policy policy, bytes32 policyTextHash);

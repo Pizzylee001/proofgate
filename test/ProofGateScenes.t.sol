@@ -189,20 +189,16 @@ contract ProofGateScenesTest is Test {
                 vm.parseJson(fixturesJson, string.concat(base, ".merkleProof.siblings")),
                 (INativeQueryVerifier.MerkleProofEntry[])
             ),
-            lowerEndpointDigest: fixturesJson.readBytes32(
-                string.concat(base, ".continuityProof.lowerEndpointDigest")
-            ),
+            lowerEndpointDigest: fixturesJson.readBytes32(string.concat(base, ".continuityProof.lowerEndpointDigest")),
             continuityRoots: abi.decode(
-                vm.parseJson(fixturesJson, string.concat(base, ".continuityProof.roots")),
-                (bytes32[])
+                vm.parseJson(fixturesJson, string.concat(base, ".continuityProof.roots")), (bytes32[])
             )
         });
     }
 
     /// @dev The repayment amount recorded alongside each fixture (whole PGUSD).
     function _fixtureAmount(uint256 idx) internal view returns (uint256) {
-        string memory whole =
-            fixturesJson.readString(string.concat("$[", vm.toString(idx), "].amountPgusd"));
+        string memory whole = fixturesJson.readString(string.concat("$[", vm.toString(idx), "].amountPgusd"));
         return vm.parseUint(whole) * 1 ether;
     }
 

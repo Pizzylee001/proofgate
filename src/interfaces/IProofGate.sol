@@ -18,30 +18,27 @@ interface IProofGate {
 
     /// @notice The AI agent's decision, submitted after proofs are on record.
     struct AgentDecision {
-        bool approved;       // the LLM's verdict
+        bool approved; // the LLM's verdict
         uint256 claimedAmount; // what the LLM says is justified
-        string rationale;    // the LLM's reasoning text
+        string rationale; // the LLM's reasoning text
     }
 
     /// @notice A repayment whose proof verified and matched a policy.
     struct ProvenRepayment {
-        uint256 amount;   // decoded from the proven receipt's Transfer event
-        bytes32 queryId;  // replay-guard id of the proof that established it
+        uint256 amount; // decoded from the proven receipt's Transfer event
+        bytes32 queryId; // replay-guard id of the proof that established it
     }
 
-    event RepaymentProven(
-        uint256 indexed policyId,
-        address indexed borrower,
-        uint256 amount,
-        bytes32 queryId
-    );
+    event RepaymentProven(uint256 indexed policyId, address indexed borrower, uint256 amount, bytes32 queryId);
 
-    event CreditReleased(
+    event CreditReleased( // decoded, proven
+        // what the AI said
+        // keccak256(rationale) — the decision receipt
         uint256 indexed policyId,
         address indexed borrower,
-        uint256 releasedAmount, // decoded, proven
-        uint256 claimedAmount,  // what the AI said
-        bytes32 rationaleHash,  // keccak256(rationale) — the decision receipt
+        uint256 releasedAmount,
+        uint256 claimedAmount,
+        bytes32 rationaleHash,
         uint256 proofsUsed
     );
 

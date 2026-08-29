@@ -24,6 +24,14 @@ jobs:
         run: |
           forge --version
 
+      - name: Install Node deps
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: npm ci
+        run: npm ci
+
       - name: Run Forge fmt
         run: |
           forge fmt --check
@@ -38,3 +46,20 @@ jobs:
         run: |
           forge test -vvv
         id: test
+
+  web-build:
+    name: Dashboard build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Node deps
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: npm ci and build
+        run: |
+          cd web
+          npm ci
+          npm run build
