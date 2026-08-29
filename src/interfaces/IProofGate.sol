@@ -31,9 +31,9 @@ interface IProofGate {
 
     event RepaymentProven(uint256 indexed policyId, address indexed borrower, uint256 amount, bytes32 queryId);
 
+    // what the AI said
+    // keccak256(rationale) — the decision receipt
     event CreditReleased( // decoded, proven
-        // what the AI said
-        // keccak256(rationale) — the decision receipt
         uint256 indexed policyId,
         address indexed borrower,
         uint256 releasedAmount,
