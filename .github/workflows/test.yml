@@ -19,6 +19,10 @@ jobs:
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
+        with:
+          # pinned: forge fmt output differs between foundry releases;
+          # must match the local toolchain exactly
+          version: v1.2.3
 
       - name: Show Forge version
         run: |

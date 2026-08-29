@@ -10,3 +10,6 @@ chrome-install.log
 
 # allow placeholder example (no secrets)
 !web/.env.example
+
+# web app shared server code (root lib/ rule is for forge deps)
+!web/lib/
