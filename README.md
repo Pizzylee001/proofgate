@@ -6,7 +6,6 @@ credit moves only when (a) the committed policy allows it and (b) the Attestcoin
 Protocol has cryptographically proven the repayment history actually happened on the
 source chain. The AI interprets the policy; the contract enforces it.**
 
-Built for **BUIDL CTC 2026 Fall** (DoraHacks), **AI track**.
 
 ---
 
